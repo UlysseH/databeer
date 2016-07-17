@@ -65,7 +65,6 @@ class FermentableItem(scrapy.Item):
     recommend_mash = scrapy.Field()
     ibu_gal_per_lb = scrapy.Field()
     notes = scrapy.Field()
-    pass
 
 
 
@@ -80,7 +79,6 @@ class HopItem(scrapy.Item):
     form = scrapy.Field()
     time = scrapy.Field()
     notes = scrapy.Field()
-    pass
 
 
 
@@ -91,3 +89,14 @@ class YeastItem(scrapy.Item):
     _type = scrapy.Field()
     form = scrapy.Field()
     attenuation = scrapy.Field()
+
+
+
+class MiscItem(scrapy.Item):
+    beer_name = scrapy.Field()
+    name = scrapy.Field()
+    use = scrapy.Field()
+    time = scrapy.Field()
+    amount = scrapy.Field()
+    amount_is_weight = scrapy.Field()
+    notes = scrapy.Field()

@@ -7,7 +7,7 @@ class MainSpider(scrapy.Spider):
     name = "main"
     allowed_domains = ["brewtoad.com"]
     start_urls = []
-    for k in range(0, 2):
+    for k in range(1, 100):
         start_urls.append("https://www.brewtoad.com/recipes?page={}&sort=rank".format(k))
 
     def parse(self, response):
@@ -31,7 +31,7 @@ class MainSpider(scrapy.Spider):
         recipe_general['batch_size'] = response.xpath('//RECIPE/BATCH_SIZE/text()').extract()
         recipe_general['boil_size'] = response.xpath('//RECIPE/BOIL_SIZE/text()').extract()
         recipe_general['efficiency'] = response.xpath('//RECIPE/EFFICIENCY/text()').extract()
-        yield recipe_general
+        #yield recipe_general
 
         # Style
         style['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
@@ -51,6 +51,7 @@ class MainSpider(scrapy.Spider):
         style['color_max'] = response.xpath('//STYLE//COLOR_MAX/text()').extract()
         style['ABV_min'] = response.xpath('//STYLE//ABV_MIN/text()').extract()
         style['ABV_max'] = response.xpath('//STYLE//ABV_MAX/text()').extract()
+        #yield style
 
         # Fermentables
         nb_of_fermentables = len(response.xpath('//FERMENTABLE'))
@@ -73,9 +74,10 @@ class MainSpider(scrapy.Spider):
             fermentable['recommend_mash'] = response.xpath('//FERMENTABLE[{}]/RECOMMEND_MASH/text()'.format(k)).extract()
             fermentable['ibu_gal_per_lb'] = response.xpath('//FERMENTABLE[{}]/IBU_GAL_PER_LB/text()'.format(k)).extract()
             fermentable['notes'] = response.xpath('//FERMENTABLE[{}]/NOTES/text()'.format(k)).extract()
+            #yield fermentable
 
         # Hops
-        nb_of_hops = len(response)
+        nb_of_hops = len(response.xpath('//HOP'))
         for k in range(1, nb_of_hops):
             hop = HopItem()
             hop['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
@@ -88,3 +90,29 @@ class MainSpider(scrapy.Spider):
             hop['form'] = response.xpath('//HOP[{}]/FORM/text()'.format(k)).extract()
             hop['time'] = response.xpath('//HOP[{}]/TIME/text()'.format(k)).extract()
             hop['notes'] = response.xpath('//HOP[{}]/NOTES/text()'.format(k)).extract()
+            #yield hop
+
+        # Yeasts
+        nb_of_yeasts = len(response.xpath('//YEAST'))
+        for k in range(1, nb_of_yeasts):
+            yeast = YeastItem()
+            yeast['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
+            yeast['name'] = response.xpath('//YEAST[{}]/NAME/text()'.format(k)).extract()
+            yeast['laboratory'] = response.xpath('//YEAST[{}]/LABORATORY/text()'.format(k)).extract()
+            yeast['_type'] = response.xpath('//YEAST[{}]/TYPE/text()'.format(k)).extract()
+            yeast['form'] = response.xpath('//YEAST[{}]/FORM/text()'.format(k)).extract()
+            yeast['attenuation'] = response.xpath('//YEAST[{}]/ATTENUATION/text()'.format(k)).extract()
+            #yield yeast
+
+        # Miscs
+        nb_of_miscs = len(response.xpath('//YEAST'))
+        for k in range(1, nb_of_miscs):
+            misc = YeastItem()
+            misc['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
+            misc['name'] = response.xpath('//MISC[{}]/NAME/text()'.format(k)).extract()
+            misc['use'] = response.xpath('//MISC[{}]/USE/text()'.format(k)).extract()
+            misc['time'] = response.xpath('//MISC[{}]/TIME/text()'.format(k)).extract()
+            misc['amount'] = response.xpath('//MISC[{}]/AMOUNT/text()'.format(k)).extract()
+            misc['amount_is_weight'] = response.xpath('//MISC[{}]/AMOUNT_IS_WEIGHT/text()'.format(k)).extract()
+            misc['notes'] = response.xpath('//MISC[{}]/NOTES/text()'.format(k)).extract()
+            #yield misc
