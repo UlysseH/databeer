@@ -1,3 +1,4 @@
+import csv
 import scrapy
 
 # Import from brewtoad
@@ -8,17 +9,79 @@ class MainSpider(scrapy.Spider):
     allowed_domains = ["brewtoad.com"]
     start_urls = []
 
-    def _init__(self, start=1, end=1):
-        for k in range(start, end):
-            start_urls.append("https://www.brewtoad.com/recipes?page={}&sort=rank".format(k))
+    def __init__(self, start='1', end='1'):
+        self.start = int(start)
+        self.end = int(end)
+        for k in range(self.start, self.end):
+            self.start_urls.append("https://www.brewtoad.com/recipes?page={}&sort=rank".format(k))
+        #
+        fieldnames = [
+            'beer_name',
+            'mash_type',
+            'brewer',
+            'batch_size',
+            'boil_size',
+            'efficiency'
+        ]
+        with open('recipes_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b') as csvfile:
+            self.writer_recipe = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #
+        fieldnames = [
+            'beer_name',
+            'beer_style',
+            'style_guide',
+            'version',
+            'style_letter',
+            'category_number',
+            'beer_type',
+            'OG_min',
+            'OG_max',
+            'FG_min',
+            'FG_max',
+            'IBU_min',
+            'IBU_max',
+            'color_min',
+            'color_max',
+            'ABV_min',
+            'ABV_max'
+        ]
+        with open('styles_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b') as csvfile:
+            self.writer_style = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #
+        fieldnames = [
+            'beer_name',
+            'name',
+            'origin',
+            '_type',
+            '_yield',
+            'amount',
+            'potential',
+            'color',
+            'add_after_boil',
+            'coarse_fine_diff',
+            'moisture',
+            'diastatic_power',
+            'protein',
+            'max_in_batch',
+            'recommend_mash',
+            'ibu_gal_per_lb',
+            'notes'
+        ]
+
+        self.recipes_file = open('recipes_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+        self.styles_file = open('styles_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+        self.fermentables_file = open('fermentables_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+        self.hops_file = open('hops_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+        self.yeasts_file = open('yeasts_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+
 
     def parse(self, response):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         for href in response.xpath('//a[@class="recipe-link"]/@href'):
             url = response.urljoin(href.extract()) + '.xml'
             print url
-            tmp = scrapy.Request(url, callback=self.parse_dir_contents)
-            import ipdb; ipdb.set_trace()
+            yield scrapy.Request(url, callback=self.parse_dir_contents)
+            #import ipdb; ipdb.set_trace()
 
     def parse_dir_contents(self, response):
         recipe_general = RecipeGeneralItem()
@@ -34,7 +97,7 @@ class MainSpider(scrapy.Spider):
         recipe_general['batch_size'] = response.xpath('//RECIPE/BATCH_SIZE/text()').extract()
         recipe_general['boil_size'] = response.xpath('//RECIPE/BOIL_SIZE/text()').extract()
         recipe_general['efficiency'] = response.xpath('//RECIPE/EFFICIENCY/text()').extract()
-        #yield recipe_general
+        import ipdb; ipdb.set_trace()
 
         # Style
         style['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
