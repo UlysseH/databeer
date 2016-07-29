@@ -14,7 +14,7 @@ class MainSpider(scrapy.Spider):
         self.end = int(end)
         for k in range(self.start, self.end):
             self.start_urls.append("https://www.brewtoad.com/recipes?page={}&sort=rank".format(k))
-        #
+        # general
         fieldnames = [
             'beer_name',
             'mash_type',
@@ -23,9 +23,9 @@ class MainSpider(scrapy.Spider):
             'boil_size',
             'efficiency'
         ]
-        with open('recipes_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b') as csvfile:
-            self.writer_recipe = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        #
+        self.csvfile_recipe = open('csv/recipes_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
+        self.writer_recipe = csv.DictWriter(self.csvfile_recipe, fieldnames=fieldnames)
+        # styles
         fieldnames = [
             'beer_name',
             'beer_style',
@@ -45,9 +45,9 @@ class MainSpider(scrapy.Spider):
             'ABV_min',
             'ABV_max'
         ]
-        with open('styles_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b') as csvfile:
-            self.writer_style = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        #
+        self.csvfile_style = open('csv/styles_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
+        self.writer_style = csv.DictWriter(self.csvfile_style, fieldnames=fieldnames)
+        # fermentables
         fieldnames = [
             'beer_name',
             'name',
@@ -67,13 +67,54 @@ class MainSpider(scrapy.Spider):
             'ibu_gal_per_lb',
             'notes'
         ]
+        self.csvfile_fermentable = open('csv/fermentables_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
+        self.writer_fermentable = csv.DictWriter(self.csvfile_fermentable, fieldnames=fieldnames)
+        # hops
+        fieldnames = [
+            'beer_name',
+            'name',
+            'origin',
+            'alpha',
+            'beta',
+            'amount',
+            'use',
+            'form',
+            'time',
+            'notes'
+        ]
+        self.csvfile_hop = open('csv/hops_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
+        self.writer_hop = csv.DictWriter(self.csvfile_hop, fieldnames=fieldnames)
+        # yeasts
+        fieldnames = [
+            'beer_name',
+            'name',
+            'laboratory',
+            '_type',
+            'form',
+            'attenuation'
+        ]
+        self.csvfile_yeast = open('csv/yeasts_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
+        self.writer_yeast = csv.DictWriter(self.csvfile_yeast, fieldnames=fieldnames)
+        # miscs
+        fieldnames = [
+            'beer_name',
+            'name',
+            'use',
+            'time',
+            'amount',
+            'amount_is_weight',
+            'notes'
+        ]
+        self.csvfile_misc = open('csv/miscs_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
+        self.writer_misc = csv.DictWriter(self.csvfile_misc, fieldnames=fieldnames)
 
-        self.recipes_file = open('recipes_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
-        self.styles_file = open('styles_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
-        self.fermentables_file = open('fermentables_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
-        self.hops_file = open('hops_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
-        self.yeasts_file = open('yeasts_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
-
+        """
+        self.recipes_file = open('csv/recipes_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+        self.styles_file = open('csv/styles_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+        self.fermentables_file = open('csv/fermentables_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+        self.hops_file = open('csv/hops_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+        self.yeasts_file = open('csv/yeasts_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
+        """
 
     def parse(self, response):
         #import pdb; pdb.set_trace()
@@ -81,7 +122,7 @@ class MainSpider(scrapy.Spider):
             url = response.urljoin(href.extract()) + '.xml'
             print url
             yield scrapy.Request(url, callback=self.parse_dir_contents)
-            #import ipdb; ipdb.set_trace()
+
 
     def parse_dir_contents(self, response):
         recipe_general = RecipeGeneralItem()
@@ -97,7 +138,7 @@ class MainSpider(scrapy.Spider):
         recipe_general['batch_size'] = response.xpath('//RECIPE/BATCH_SIZE/text()').extract()
         recipe_general['boil_size'] = response.xpath('//RECIPE/BOIL_SIZE/text()').extract()
         recipe_general['efficiency'] = response.xpath('//RECIPE/EFFICIENCY/text()').extract()
-        import ipdb; ipdb.set_trace()
+        self.writer_recipe.writerow(recipe_general)
 
         # Style
         style['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
@@ -117,7 +158,7 @@ class MainSpider(scrapy.Spider):
         style['color_max'] = response.xpath('//STYLE//COLOR_MAX/text()').extract()
         style['ABV_min'] = response.xpath('//STYLE//ABV_MIN/text()').extract()
         style['ABV_max'] = response.xpath('//STYLE//ABV_MAX/text()').extract()
-        #yield style
+        self.writer_style.writerow(style)
 
         # Fermentables
         nb_of_fermentables = len(response.xpath('//FERMENTABLE'))
@@ -140,7 +181,7 @@ class MainSpider(scrapy.Spider):
             fermentable['recommend_mash'] = response.xpath('//FERMENTABLE[{}]/RECOMMEND_MASH/text()'.format(k)).extract()
             fermentable['ibu_gal_per_lb'] = response.xpath('//FERMENTABLE[{}]/IBU_GAL_PER_LB/text()'.format(k)).extract()
             fermentable['notes'] = response.xpath('//FERMENTABLE[{}]/NOTES/text()'.format(k)).extract()
-            #yield fermentable
+            self.writer_fermentable.writerow(fermentable)
 
         # Hops
         nb_of_hops = len(response.xpath('//HOP'))
@@ -156,7 +197,7 @@ class MainSpider(scrapy.Spider):
             hop['form'] = response.xpath('//HOP[{}]/FORM/text()'.format(k)).extract()
             hop['time'] = response.xpath('//HOP[{}]/TIME/text()'.format(k)).extract()
             hop['notes'] = response.xpath('//HOP[{}]/NOTES/text()'.format(k)).extract()
-            #yield hop
+            self.writer_hop.writerow(hop)
 
         # Yeasts
         nb_of_yeasts = len(response.xpath('//YEAST'))
@@ -168,7 +209,7 @@ class MainSpider(scrapy.Spider):
             yeast['_type'] = response.xpath('//YEAST[{}]/TYPE/text()'.format(k)).extract()
             yeast['form'] = response.xpath('//YEAST[{}]/FORM/text()'.format(k)).extract()
             yeast['attenuation'] = response.xpath('//YEAST[{}]/ATTENUATION/text()'.format(k)).extract()
-            #yield yeast
+            self.writer_yeast.writerow(yeast)
 
         # Miscs
         nb_of_miscs = len(response.xpath('//YEAST'))
@@ -181,4 +222,6 @@ class MainSpider(scrapy.Spider):
             misc['amount'] = response.xpath('//MISC[{}]/AMOUNT/text()'.format(k)).extract()
             misc['amount_is_weight'] = response.xpath('//MISC[{}]/AMOUNT_IS_WEIGHT/text()'.format(k)).extract()
             misc['notes'] = response.xpath('//MISC[{}]/NOTES/text()'.format(k)).extract()
-            #yield misc
+            self.writer_misc.writerow(misc)
+
+        yield 'ok'
