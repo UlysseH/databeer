@@ -13,7 +13,7 @@ class BrewtoadPipeline(object):
 
 
 
-class JsonWriterPipeline(object):
+class JsonExportPipeline(object):
 
     def __init__(self):
         self.file = open('items.jl', 'wb')

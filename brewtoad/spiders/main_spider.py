@@ -7,15 +7,18 @@ class MainSpider(scrapy.Spider):
     name = "main"
     allowed_domains = ["brewtoad.com"]
     start_urls = []
-    for k in range(1, 100):
-        start_urls.append("https://www.brewtoad.com/recipes?page={}&sort=rank".format(k))
+
+    def _init__(self, start=1, end=1):
+        for k in range(start, end):
+            start_urls.append("https://www.brewtoad.com/recipes?page={}&sort=rank".format(k))
 
     def parse(self, response):
+        import pdb; pdb.set_trace()
         for href in response.xpath('//a[@class="recipe-link"]/@href'):
             url = response.urljoin(href.extract()) + '.xml'
             print url
-            yield scrapy.Request(url, callback=self.parse_dir_contents)
-
+            tmp = scrapy.Request(url, callback=self.parse_dir_contents)
+            import ipdb; ipdb.set_trace()
 
     def parse_dir_contents(self, response):
         recipe_general = RecipeGeneralItem()
