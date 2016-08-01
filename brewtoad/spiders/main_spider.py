@@ -9,7 +9,7 @@ class MainSpider(scrapy.Spider):
     allowed_domains = ["brewtoad.com"]
     start_urls = []
 
-    def __init__(self, start='1', end='1'):
+    def __init__(self, start='1', end='2'):
         self.start = int(start)
         self.end = int(end)
         for k in range(self.start, self.end):
@@ -25,6 +25,7 @@ class MainSpider(scrapy.Spider):
         ]
         self.csvfile_recipe = open('csv/recipes_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
         self.writer_recipe = csv.DictWriter(self.csvfile_recipe, fieldnames=fieldnames)
+        self.writer_recipe.writeheader()
         # styles
         fieldnames = [
             'beer_name',
@@ -47,6 +48,7 @@ class MainSpider(scrapy.Spider):
         ]
         self.csvfile_style = open('csv/styles_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
         self.writer_style = csv.DictWriter(self.csvfile_style, fieldnames=fieldnames)
+        self.writer_style.writeheader()
         # fermentables
         fieldnames = [
             'beer_name',
@@ -69,6 +71,7 @@ class MainSpider(scrapy.Spider):
         ]
         self.csvfile_fermentable = open('csv/fermentables_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
         self.writer_fermentable = csv.DictWriter(self.csvfile_fermentable, fieldnames=fieldnames)
+        self.writer_fermentable.writeheader()
         # hops
         fieldnames = [
             'beer_name',
@@ -84,6 +87,7 @@ class MainSpider(scrapy.Spider):
         ]
         self.csvfile_hop = open('csv/hops_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
         self.writer_hop = csv.DictWriter(self.csvfile_hop, fieldnames=fieldnames)
+        self.writer_hop.writeheader()
         # yeasts
         fieldnames = [
             'beer_name',
@@ -95,6 +99,7 @@ class MainSpider(scrapy.Spider):
         ]
         self.csvfile_yeast = open('csv/yeasts_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
         self.writer_yeast = csv.DictWriter(self.csvfile_yeast, fieldnames=fieldnames)
+        self.writer_yeast.writeheader()
         # miscs
         fieldnames = [
             'beer_name',
@@ -107,7 +112,7 @@ class MainSpider(scrapy.Spider):
         ]
         self.csvfile_misc = open('csv/miscs_page_{0}_to_{1}.csv'.format(self.start, self.end), 'w+b')
         self.writer_misc = csv.DictWriter(self.csvfile_misc, fieldnames=fieldnames)
-
+        self.writer_misc.writeheader()
         """
         self.recipes_file = open('csv/recipes_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
         self.styles_file = open('csv/styles_page_{0}_to_{1}.json'.format(self.start, self.end), 'w+b')
@@ -120,11 +125,10 @@ class MainSpider(scrapy.Spider):
         #import pdb; pdb.set_trace()
         for href in response.xpath('//a[@class="recipe-link"]/@href'):
             url = response.urljoin(href.extract()) + '.xml'
-            print url
-            yield scrapy.Request(url, callback=self.parse_dir_contents)
+            yield scrapy.Request(url, href.extract()[9:], callback=self.parse_dir_contents)
 
 
-    def parse_dir_contents(self, response):
+    def parse_dir_contents(self, response, beer_id):
         recipe_general = RecipeGeneralItem()
         style = StyleItem()
         fermentables = []
@@ -132,6 +136,7 @@ class MainSpider(scrapy.Spider):
         yeasts = []
 
         # RecipeGeneralItem
+        recipe_general['id'] = beer_id
         recipe_general['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
         recipe_general['mash_type'] = response.xpath('//RECIPE/TYPE/text()').extract()
         recipe_general['brewer'] = response.xpath('//RECIPE/BREWER/text()').extract()
@@ -141,6 +146,7 @@ class MainSpider(scrapy.Spider):
         self.writer_recipe.writerow(recipe_general)
 
         # Style
+        style['id'] = beer_id
         style['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
         style['beer_style'] = response.xpath('//STYLE//NAME/text()').extract()
         style['style_guide'] = response.xpath('//STYLE//STYLE_GUIDE/text()').extract()
@@ -164,7 +170,8 @@ class MainSpider(scrapy.Spider):
         nb_of_fermentables = len(response.xpath('//FERMENTABLE'))
         for k in range(1, nb_of_fermentables):
             fermentable = FermentableItem()
-            fermentable['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
+            
+            fermentable['beer_id'] = response.xpath('//RECIPE/NAME/text()').extract()
             fermentable['name'] = response.xpath('//FERMENTABLE[{}]/NAME/text()'.format(k)).extract()
             fermentable['origin'] = response.xpath('//FERMENTABLE[{}]/ORIGIN/text()'.format(k)).extract()
             fermentable['_type'] = response.xpath('//FERMENTABLE[{}]/TYPE/text()'.format(k)).extract()
