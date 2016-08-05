@@ -16,6 +16,7 @@ class MainSpider(scrapy.Spider):
             self.start_urls.append("https://www.brewtoad.com/recipes?page={}&sort=rank".format(k))
         # general
         fieldnames = [
+            'beer_id',
             'beer_name',
             'mash_type',
             'brewer',
@@ -28,6 +29,7 @@ class MainSpider(scrapy.Spider):
         self.writer_recipe.writeheader()
         # styles
         fieldnames = [
+            'beer_id',
             'beer_name',
             'beer_style',
             'style_guide',
@@ -51,6 +53,7 @@ class MainSpider(scrapy.Spider):
         self.writer_style.writeheader()
         # fermentables
         fieldnames = [
+            'beer_id',
             'beer_name',
             'name',
             'origin',
@@ -74,6 +77,7 @@ class MainSpider(scrapy.Spider):
         self.writer_fermentable.writeheader()
         # hops
         fieldnames = [
+            'beer_id',
             'beer_name',
             'name',
             'origin',
@@ -90,6 +94,7 @@ class MainSpider(scrapy.Spider):
         self.writer_hop.writeheader()
         # yeasts
         fieldnames = [
+            'beer_id',
             'beer_name',
             'name',
             'laboratory',
@@ -102,6 +107,7 @@ class MainSpider(scrapy.Spider):
         self.writer_yeast.writeheader()
         # miscs
         fieldnames = [
+            'beer_id',
             'beer_name',
             'name',
             'use',
@@ -125,18 +131,17 @@ class MainSpider(scrapy.Spider):
         #import pdb; pdb.set_trace()
         for href in response.xpath('//a[@class="recipe-link"]/@href'):
             url = response.urljoin(href.extract()) + '.xml'
-            yield scrapy.Request(url, href.extract()[9:], callback=self.parse_dir_contents)
+            yield scrapy.Request(url, callback=self.parse_dir_contents)
 
 
-    def parse_dir_contents(self, response, beer_id):
+    def parse_dir_contents(self, response):
         recipe_general = RecipeGeneralItem()
         style = StyleItem()
         fermentables = []
         hops = []
         yeasts = []
-
         # RecipeGeneralItem
-        recipe_general['id'] = beer_id
+        recipe_general['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
         recipe_general['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
         recipe_general['mash_type'] = response.xpath('//RECIPE/TYPE/text()').extract()
         recipe_general['brewer'] = response.xpath('//RECIPE/BREWER/text()').extract()
@@ -146,7 +151,7 @@ class MainSpider(scrapy.Spider):
         self.writer_recipe.writerow(recipe_general)
 
         # Style
-        style['id'] = beer_id
+        style['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
         style['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
         style['beer_style'] = response.xpath('//STYLE//NAME/text()').extract()
         style['style_guide'] = response.xpath('//STYLE//STYLE_GUIDE/text()').extract()
@@ -170,8 +175,8 @@ class MainSpider(scrapy.Spider):
         nb_of_fermentables = len(response.xpath('//FERMENTABLE'))
         for k in range(1, nb_of_fermentables):
             fermentable = FermentableItem()
-            
-            fermentable['beer_id'] = response.xpath('//RECIPE/NAME/text()').extract()
+            fermentable['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
+            fermentable['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
             fermentable['name'] = response.xpath('//FERMENTABLE[{}]/NAME/text()'.format(k)).extract()
             fermentable['origin'] = response.xpath('//FERMENTABLE[{}]/ORIGIN/text()'.format(k)).extract()
             fermentable['_type'] = response.xpath('//FERMENTABLE[{}]/TYPE/text()'.format(k)).extract()
@@ -194,6 +199,7 @@ class MainSpider(scrapy.Spider):
         nb_of_hops = len(response.xpath('//HOP'))
         for k in range(1, nb_of_hops):
             hop = HopItem()
+            hop['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
             hop['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
             hop['name'] = response.xpath('//HOP[{}]/NAME/text()'.format(k)).extract()
             hop['origin'] = response.xpath('//HOP[{}]/ORIGIN/text()'.format(k)).extract()
@@ -210,6 +216,7 @@ class MainSpider(scrapy.Spider):
         nb_of_yeasts = len(response.xpath('//YEAST'))
         for k in range(1, nb_of_yeasts):
             yeast = YeastItem()
+            yeast['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
             yeast['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
             yeast['name'] = response.xpath('//YEAST[{}]/NAME/text()'.format(k)).extract()
             yeast['laboratory'] = response.xpath('//YEAST[{}]/LABORATORY/text()'.format(k)).extract()
@@ -222,6 +229,7 @@ class MainSpider(scrapy.Spider):
         nb_of_miscs = len(response.xpath('//YEAST'))
         for k in range(1, nb_of_miscs):
             misc = YeastItem()
+            misc['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
             misc['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
             misc['name'] = response.xpath('//MISC[{}]/NAME/text()'.format(k)).extract()
             misc['use'] = response.xpath('//MISC[{}]/USE/text()'.format(k)).extract()

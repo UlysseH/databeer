@@ -14,6 +14,7 @@ BOT_NAME = 'brewtoad'
 SPIDER_MODULES = ['brewtoad.spiders']
 NEWSPIDER_MODULE = 'brewtoad.spiders'
 
+# LOG_ENABLED = False
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'brewtoad (+http://www.yourdomain.com)'

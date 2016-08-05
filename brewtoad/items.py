@@ -16,6 +16,7 @@ class BrewtoadItem(scrapy.Item):
 
 
 class RecipeGeneralItem(scrapy.Item):
+    beer_id = scrapy.Field()
     beer_name = scrapy.Field()
     mash_type = scrapy.Field()
     brewer = scrapy.Field()
@@ -27,6 +28,7 @@ class RecipeGeneralItem(scrapy.Item):
 
 
 class StyleItem(scrapy.Item):
+    beer_id = scrapy.Field()
     beer_name = scrapy.Field()
     beer_style = scrapy.Field()
     style_guide = scrapy.Field()
@@ -48,6 +50,7 @@ class StyleItem(scrapy.Item):
 
 
 class FermentableItem(scrapy.Item):
+    beer_id = scrapy.Field()
     beer_name = scrapy.Field()
     name = scrapy.Field()
     origin = scrapy.Field()
@@ -69,6 +72,7 @@ class FermentableItem(scrapy.Item):
 
 
 class HopItem(scrapy.Item):
+    beer_id = scrapy.Field()
     beer_name = scrapy.Field()
     name = scrapy.Field()
     origin = scrapy.Field()
@@ -83,6 +87,7 @@ class HopItem(scrapy.Item):
 
 
 class YeastItem(scrapy.Item):
+    beer_id = scrapy.Field()
     beer_name = scrapy.Field()
     name = scrapy.Field()
     laboratory = scrapy.Field()
@@ -93,6 +98,7 @@ class YeastItem(scrapy.Item):
 
 
 class MiscItem(scrapy.Item):
+    beer_id = scrapy.Field()
     beer_name = scrapy.Field()
     name = scrapy.Field()
     use = scrapy.Field()
