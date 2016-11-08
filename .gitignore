@@ -1,5 +1,6 @@
 .DS_Store
 items.json
 brewtoad/csv/**/*
+.ipynb_checkpoints/**/*
 
 *.xml
