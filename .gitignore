@@ -1,0 +1,5 @@
+.DS_Store
+items.json
+.ipynb_checkpoints/**/*
+
+*.xml
