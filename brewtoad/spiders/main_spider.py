@@ -2,7 +2,7 @@ import csv
 import scrapy
 
 # Import from brewtoad
-from brewtoad.items import RecipeGeneralItem, StyleItem, FermentableItem, HopItem, YeastItem
+from brewtoad.items import RecipeGeneralItem, StyleItem, FermentableItem, HopItem, YeastItem, MiscItem
 
 class MainSpider(scrapy.Spider):
     name = "main"
@@ -83,6 +83,7 @@ class MainSpider(scrapy.Spider):
             'origin',
             'alpha',
             'beta',
+            'display_amount',
             'amount',
             'use',
             'form',
@@ -173,7 +174,7 @@ class MainSpider(scrapy.Spider):
 
         # Fermentables
         nb_of_fermentables = len(response.xpath('//FERMENTABLE'))
-        for k in range(1, nb_of_fermentables):
+        for k in range(1, nb_of_fermentables + 1):
             fermentable = FermentableItem()
             fermentable['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
             fermentable['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
@@ -197,7 +198,7 @@ class MainSpider(scrapy.Spider):
 
         # Hops
         nb_of_hops = len(response.xpath('//HOP'))
-        for k in range(1, nb_of_hops):
+        for k in range(1, nb_of_hops + 1):
             hop = HopItem()
             hop['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
             hop['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
@@ -205,6 +206,7 @@ class MainSpider(scrapy.Spider):
             hop['origin'] = response.xpath('//HOP[{}]/ORIGIN/text()'.format(k)).extract()
             hop['alpha'] = response.xpath('//HOP[{}]/ALPHA/text()'.format(k)).extract()
             hop['beta'] = response.xpath('//HOP[{}]/BETA/text()'.format(k)).extract()
+            hop['display_amount'] = response.xpath('//HOP[{}]/DISPLAY_AMOUNT/text()'.format(k)).extract()
             hop['amount'] = response.xpath('//HOP[{}]/AMOUNT/text()'.format(k)).extract()
             hop['use'] = response.xpath('//HOP[{}]/USE/text()'.format(k)).extract()
             hop['form'] = response.xpath('//HOP[{}]/FORM/text()'.format(k)).extract()
@@ -214,7 +216,7 @@ class MainSpider(scrapy.Spider):
 
         # Yeasts
         nb_of_yeasts = len(response.xpath('//YEAST'))
-        for k in range(1, nb_of_yeasts):
+        for k in range(1, nb_of_yeasts + 1):
             yeast = YeastItem()
             yeast['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
             yeast['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
@@ -226,9 +228,9 @@ class MainSpider(scrapy.Spider):
             self.writer_yeast.writerow(yeast)
 
         # Miscs
-        nb_of_miscs = len(response.xpath('//YEAST'))
-        for k in range(1, nb_of_miscs):
-            misc = YeastItem()
+        nb_of_miscs = len(response.xpath('//MISCS'))
+        for k in range(1, nb_of_miscs + 1):
+            misc = MiscItem()
             misc['beer_id'] = response.url.split('/')[-1].split('.xml')[0]
             misc['beer_name'] = response.xpath('//RECIPE/NAME/text()').extract()
             misc['name'] = response.xpath('//MISC[{}]/NAME/text()'.format(k)).extract()

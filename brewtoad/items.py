@@ -78,6 +78,7 @@ class HopItem(scrapy.Item):
     origin = scrapy.Field()
     alpha = scrapy.Field()
     beta = scrapy.Field()
+    display_amount = scrapy.Field()
     amount = scrapy.Field()
     use = scrapy.Field()
     form = scrapy.Field()
@@ -94,7 +95,6 @@ class YeastItem(scrapy.Item):
     _type = scrapy.Field()
     form = scrapy.Field()
     attenuation = scrapy.Field()
-
 
 
 class MiscItem(scrapy.Item):
