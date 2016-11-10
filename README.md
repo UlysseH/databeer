@@ -12,7 +12,7 @@ The first source we crawled. Contains approximately 300 000 recipes.
 Scrapy files can be found in **databeer/brewtoad**.
 The data is then written in csv files, which you can found in **databeer/brewtoad/csv**.
 
-#### 1.2 beersmith.com
+#### 1.2. beersmith.com
 TBD
 
 ### 2. Structuring data
@@ -21,7 +21,10 @@ For the time being, there are mostly sandboxes to play with the data and find id
 #### 2.1. utils.py
 In order to lighten the notebooks, some functions are defined in *utils.py* file.
 This file is also a work in progress and will be refactored in the future.
-#### 2.2 
+#### 2.2. Sandbox notebook
+Various aggregations and other tests on the data.
+#### 2.3. Hops Studies notebook
+An attempt to focus on Hops data.
 
 ### 3. Machine learning applications
 Steps 1 and 2 gave us some ideas about what we'd like to obtain and how we might be able to do so.
